@@ -1,0 +1,12 @@
+{
+  "config": {
+    "vendor-dir": "application/vendor"
+  },
+  "require": {
+    "ext-json": "*",
+    "ext-curl": "*",
+    "ext-openssl": "*",
+    "eftec/bladeone": "^4.5",
+    "hassankhan/config": "^3.0"
+  }
+}

@@ -1,0 +1,7 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule ^(patch|\.gitignore|setup\.php|composer\.(json|lock)) - [F,L,NC]
+RewriteCond $1 !^(index\.php|robots\.txt|sitemap\.xml)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L,QSA]
