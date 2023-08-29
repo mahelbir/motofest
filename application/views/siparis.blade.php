@@ -27,8 +27,18 @@
                             <h3>{{$urun['isim']}}</h3>
                             <h5>{{$urun['fiyat']}} TL</h5>
                         </div>
-                        <button class="btn btn-success" onclick="urun({{$urun['id']}})" id="btn{{$urun['id']}}">Ekle
-                        </button>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <button class="btn btn-success btn-block" onclick="urunIslem({{$urun['id']}}, '+')"
+                                        id="btn{{$urun['id']}}">+
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-danger btn-block" onclick="urunIslem({{$urun['id']}}, '-')"
+                                        id="btn{{$urun['id']}}">-
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             @endforeach
@@ -37,8 +47,9 @@
                 <hr>
                 <h3>Fiş Bilgisi</h3>
                 <div id="siparis">
+                    <p id="saat"></p>
                     <p>Sipariş No: <span id="siparisNo"></span></p>
-                    <p>Tutar: <span class="tutar"></span></p>
+                    <p>Tutar: <span class="tutar"></span> TL</p>
                     <ul id="siparisIcerik"></ul>
                 </div>
             </div>
@@ -54,6 +65,7 @@
     const sepet = {};
 
     function olustur() {
+        const date = new Date();
         const tutar = parseFloat($(".tutar").first().text());
         if (tutar === 0)
             return alert("Sepet boş!");
@@ -65,13 +77,14 @@
         const icerik = $("#siparisIcerik");
         icerik.html('');
         $(".btn").prop('disabled', true);
-        $("#btnOlustur").text("Sayfayı yenilemek için ekranda herhangi bir yere tıkla!");
+        $("#btnOlustur").text("Sayfanın yenilenmesi ve işlemin tamamlanması için ekranda herhangi bir yere tıkla!");
+        $("#saat").text(date.toLocaleDateString() + ' ' + date.toLocaleTimeString());
         for (const id in sepet) {
             const adet = sepet[id]
             const urun = urunler[id];
-            const metin = `${urun['isim']} x${adet}`;
-            icerik.append(`<li></li>`);
-            data.icerik.push(urun['isim']);
+            const metin = `${urun['fiyat'] * adet} TL | ${urun['isim']} x${adet}`;
+            icerik.append(`<li>${metin}</li>`);
+            data.icerik.push(metin);
         }
         data.icerik = data.icerik.join();
 
@@ -92,7 +105,7 @@
                 });
             } else {
                 alert(res?.error ?? "Bir hata oluştu!");
-                location.reload()
+                location.reload();
             }
         }).fail(xhr => {
             alert(xhr?.responseJSON?.error ?? 'Sunucu hatası!');
@@ -100,32 +113,26 @@
         });
     }
 
-    function urun(id) {
+    function urunIslem(id, islem) {
         id = id.toString();
-
-        const btn = $("#btn" + id);
-        if (id in sepet) {
-            delete sepet[id];
-            btn.removeClass("btn-danger");
-            btn.addClass("btn-success");
-            btn.text("Ekle");
-        } else {
+        if (islem === '+') {
             if (!sepet[id])
-                sepet[id] = 1
+                sepet[id] = 1;
             else
                 sepet[id] += 1;
-            btn.addClass("btn-danger");
-            btn.removeClass("btn-success");
-            btn.text("Çıkar");
+        } else if(islem === '-' && id in sepet) {
+            if(sepet[id] === 1)
+                delete sepet[id];
+            else
+                sepet[id] -= 1;
         }
-
         tutarHesapla();
     }
 
     function tutarHesapla() {
         let tutar = 0;
         for (const id in sepet)
-            tutar += parseFloat(urunler[id]['fiyat']);
+            tutar += urunler[id]['fiyat'] * sepet[id];
         $(".tutar").text(tutar);
     }
 </script>
